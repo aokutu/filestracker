@@ -5,7 +5,7 @@ import (
     "log"
     "os"
     "os/user"
-    "path/filepath"
+    "path/filepath"  // Make sure this is imported
     "sync"
     "time"
 )
@@ -54,30 +54,38 @@ func scanDir(root string) {
         prev, exists := fileStates[path]
         fileStates[path] = FileInfo{ModTime: info.ModTime(), IsDir: info.IsDir()}
 
-        if !exists {
-            fmt.Println(userdetails(), timestamp(), "New file/folder:", )
-
-			Sendfiles( path) 
-        } else if !prev.ModTime.Equal(info.ModTime()) {
-            op := "modified"
-            if info.IsDir() != prev.IsDir {
-                op = "replaced"
-            }
-            fmt.Println(userdetails(), timestamp(), op+":", path)
-			Sendfiles(path) 
-        }
+      if !exists {
+    fmt.Println(userdetails(), timestamp(), "New file/folder:", path)
+    // Extract just the filename from the full path
+    filename := filepath.Base(path)  // This turns "storage/abc" into "abc"
+    Sendfiles(filename)  // Pass just the filename
+} else if !prev.ModTime.Equal(info.ModTime()) {
+    op := "modified"
+    if info.IsDir() != prev.IsDir {
+        op = "replaced"
+    }
+    fmt.Println(userdetails(), timestamp(), op+":", path)
+    // Also fix the modified case
+    filename := filepath.Base(path)
+    Sendfiles(filename)
+}
         return nil
     })
 
-    // Detect deletions
-    for path := range fileStates {
-        _, err := os.Stat(path)
-        if os.IsNotExist(err) {
-            fmt.Println(userdetails(), timestamp(), "deleted:", path)
-            delete(fileStates, path)
-			DeleteFile(path)
-        }
+     // Detect deletions
+for path := range fileStates {
+    _, err := os.Stat(path)
+    if os.IsNotExist(err) {
+        fmt.Println(userdetails(), timestamp(), "DELETION DETECTED:", path)
+        delete(fileStates, path)
+        
+        // Extract just the filename
+        filename := filepath.Base(path)
+        
+        // Call DeleteFile with just the filename
+        DeleteFile(filename)
     }
+}
 }
 
 func timestamp() string {

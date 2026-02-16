@@ -1,35 +1,18 @@
-// fileops.go - Independent file operations (upload/delete)
 package main
 
 import (
     "fmt"
-
-    "net/http"
-    
+    "os/exec"
 )
 
-const uploadURL = "http://127.0.0.1:8080/backupdir"
-
 func DeleteFile(filename string) {
-    deleteURL := uploadURL + "/" + filename
+    serverurl :=Getaddress() + "?file=" 
+    cmd := exec.Command("curl", "-X", "DELETE",serverurl+filename)
     
-    req, err := http.NewRequest("DELETE", deleteURL, nil)
+    err := cmd.Run()
     if err != nil {
-        fmt.Println("Error creating DELETE request:", err)
-        return
-    }
-
-    client := &http.Client{}
-    resp, err := client.Do(req)
-    if err != nil {
-        fmt.Println("Error deleting file:", err)
-        return
-    }
-    defer resp.Body.Close()
-
-    if resp.StatusCode == 200 || resp.StatusCode == 204 {
-        fmt.Println("File deleted successfully:", filename)
+        fmt.Printf("Failed to delete %s: %v\n", filename, err)
     } else {
-        fmt.Println("Delete failed for", filename, "- Status:", resp.Status)
+        fmt.Printf("Successfully deleted %s from backupdir\n", filename)
     }
 }
