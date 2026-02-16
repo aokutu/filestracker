@@ -3,93 +3,92 @@ package main
 import (
     "fmt"
     "log"
-	"time"
-	"strconv"
-	"strings"
-    "github.com/fsnotify/fsnotify"
-	"os"
-	 "os/user"
+    "os"
+    "os/user"
+    "path/filepath"
+    "sync"
+    "time"
+)
+
+type FileInfo struct {
+    ModTime time.Time
+    IsDir   bool
+}
+
+var (
+    fileStates = make(map[string]FileInfo)
+    mu         sync.RWMutex
 )
 
 func main() {
-
-
-
-	timestamp()
-    watcher, err := fsnotify.NewWatcher()
-    if err != nil {
+	
+    timestamp()
+    root := "./storage"
+    if err := os.MkdirAll(root, 0755); err != nil {
         log.Fatal(err)
     }
-    defer watcher.Close()
+    scanDir(root)
 
-    // Start listening for events
-    go func() {
-        for {
-            select {
-            case event := <-watcher.Events:
-               // fmt.Println("Event:", event)
-                if event.Op&fsnotify.Create == fsnotify.Create {
-                    fmt.Println(userdetails(),timestamp() ,"New file created:", event.Name)
-                }
-                if event.Op&fsnotify.Write == fsnotify.Write {
-                    fmt.Println(userdetails(),timestamp() ,"File modified:", event.Name)
-                }
-                if event.Op&fsnotify.Remove == fsnotify.Remove {
-                    fmt.Println(userdetails(),timestamp(),"File deleted:", event.Name)
-                }
-            case err := <-watcher.Errors:
-                fmt.Println("Error:", err)
-            }
-        }
-    }()
+    fmt.Println("Polling ./storage folder...")
+    ticker := time.NewTicker(2 * time.Second) // Adjust interval as needed
+    defer ticker.Stop()
 
-    // Watch your "storage" folder
-    err = watcher.Add("./storage")
-    if err != nil {
-        log.Fatal(err)
+    for range ticker.C {
+        scanDir(root)
     }
-
-    fmt.Println("Watching ./storage folder…")
-    select {} // block forever
 }
 
-func timestamp() string{
-	 now := time.Now()
-	var tracktime strings.Builder
-	tracktime.WriteString(strconv.Itoa(now.Year()))
-	tracktime.WriteString("-")
-	tracktime.WriteString(strconv.Itoa(int(now.Month())))
-	tracktime.WriteString("-")
-	tracktime.WriteString(strconv.Itoa(now.Day()))
-	tracktime.WriteString("-")
-	tracktime.WriteString(strconv.Itoa(now.Hour()))
-	tracktime.WriteString(":")
-	tracktime.WriteString(strconv.Itoa(now.Minute()))
-	tracktime.WriteString(":")
-	tracktime.WriteString(strconv.Itoa(now.Second()))
-	return tracktime.String()
+func scanDir(root string) {
+    mu.Lock()
+    defer mu.Unlock()
 
+    filepath.WalkDir(root, func(path string, d os.DirEntry, err error) error {
+        if err != nil {
+            return err
+        }
+        info, err := d.Info()
+        if err != nil {
+            return err
+        }
 
+        prev, exists := fileStates[path]
+        fileStates[path] = FileInfo{ModTime: info.ModTime(), IsDir: info.IsDir()}
+
+        if !exists {
+            fmt.Println(userdetails(), timestamp(), "New file/folder:", )
+
+			Sendfiles( path) 
+        } else if !prev.ModTime.Equal(info.ModTime()) {
+            op := "modified"
+            if info.IsDir() != prev.IsDir {
+                op = "replaced"
+            }
+            fmt.Println(userdetails(), timestamp(), op+":", path)
+			Sendfiles(path) 
+        }
+        return nil
+    })
+
+    // Detect deletions
+    for path := range fileStates {
+        _, err := os.Stat(path)
+        if os.IsNotExist(err) {
+            fmt.Println(userdetails(), timestamp(), "deleted:", path)
+            delete(fileStates, path)
+			DeleteFile(path)
+        }
+    }
+}
+
+func timestamp() string {
+    now := time.Now()
+    return fmt.Sprintf("%d-%02d-%02d-%02d:%02d:%02d",
+        now.Year(), now.Month(), now.Day(),
+        now.Hour(), now.Minute(), now.Second())
 }
 
 func userdetails() string {
-
-	var userdetails  strings.Builder
-		hostname, err := os.Hostname()
-if err != nil {
-    fmt.Println("Error:", err)
-}
-
-userdetails.WriteString(hostname)
-
- u, err := user.Current()
-    if err != nil {
-        fmt.Println("Error getting user:", err)
-       
-    }
-
-	userdetails.WriteString(":")
-	userdetails.WriteString(u.Username)
-	return userdetails.String()
-
+    hostname, _ := os.Hostname()
+    u, _ := user.Current()
+    return fmt.Sprintf("%s:%s", hostname, u.Username)
 }
