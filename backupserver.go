@@ -5,6 +5,9 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"net"
+	"bufio"
+	"log"
 )
 
 func uploadHandler(w http.ResponseWriter, r *http.Request) {
@@ -51,10 +54,41 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+
+ listen, err := net.Listen("tcp", "localhost:3001")
+    if err != nil {
+        fmt.Println(err)
+    }
+
+	 conn, err := listen.Accept()
+
+	 fmt.Println("Client connected:", conn.RemoteAddr())
+	 handleConnection(conn)
+
+
 	// Define the endpoint for file upload
 	http.HandleFunc("/backupdir", uploadHandler)
 
 	// Start the server
 	fmt.Println("Server running on :8080")
 	http.ListenAndServe(":8080", nil)
+}
+
+
+func handleConnection(conn net.Conn) {
+    defer conn.Close()
+
+    reader := bufio.NewReader(conn)
+
+    for {
+        // Read until newline
+        line, err := reader.ReadString('\n')
+     if err != nil {
+    fmt.Println("Connection closed or error:", err)
+    log.Println( line )
+    return
+}
+
+        fmt.Println("Received from client:", line)
+    }
 }

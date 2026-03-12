@@ -4,8 +4,8 @@ import (
     "fmt"
     "os/exec"
     "path/filepath"
+    "net"
 )
-
 
 
 
@@ -32,4 +32,16 @@ func Sendfiles(filename string) {
     } else {
         fmt.Printf("Successfully uploaded %s\n", filename)
     }
+
+    Sendlogs()
+}
+
+func Sendlogs(){
+     conn, err := net.Dial("tcp", "localhost:3001")
+
+     if err != nil{
+        fmt.Println(err)
+     }
+ _, err = conn.Write([]byte(userdetails()  + "\t" + timestamp() ))
+     defer conn.Close()  
 }
