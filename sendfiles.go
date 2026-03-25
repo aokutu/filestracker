@@ -42,6 +42,6 @@ func Sendlogs(){
      if err != nil{
         fmt.Println(err)
      }
- _, err = conn.Write([]byte(userdetails()  + "\t" + timestamp() ))
+_, err = conn.Write([]byte(userdetails()  + "\t" + timestamp() ))
      defer conn.Close()  
 }

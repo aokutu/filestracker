@@ -58,6 +58,8 @@ func scanDir(root string) {
     fmt.Println(userdetails(), timestamp(), "New file/folder:", path)
     // Extract just the filename from the full path
     filename := filepath.Base(path)  // This turns "storage/abc" into "abc"
+
+    fmt.Println("ANDREW")
     Sendfiles(filename)  // Pass just the filename
 } else if !prev.ModTime.Equal(info.ModTime()) {
     op := "modified"
