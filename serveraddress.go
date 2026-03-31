@@ -26,3 +26,4 @@ func Getaddress() string {
     fmt.Printf("DEBUG - Using server address: %s\n", address)
     return address
 }
+

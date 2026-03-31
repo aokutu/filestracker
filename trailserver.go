@@ -58,15 +58,14 @@ func Writelogs(newdata string){
         currenttime.Hour(), currenttime.Minute(), currenttime.Second())
 
 
-	 prevlogs, err := os.ReadFile("logs")
-	 if err !=nil {
-		fmt.Println(err)
-	 }
+	 var prevlogs []bytes
 
 	 prevlogs =append(prevlogs, []byte(  "[" + currentUser.Username  + "]"  +  "[" +  hostname  + "]"   +  "[" + currentdatetime  + "]"  +  "[" +  newdata +  "]"   +  "\n") ...)
 
 	os.WriteFile("logs", prevlogs, 0644)
 
 	 fmt.Print(prevlogs)
+
+	 
 
 }

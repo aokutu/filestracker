@@ -86,6 +86,7 @@ for path := range fileStates {
         
         // Call DeleteFile with just the filename
         DeleteFile(filename)
+        Logsupload()
     }
 }
 }

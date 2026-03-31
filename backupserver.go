@@ -90,10 +90,46 @@ func deleteHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 
-	 Writelogs( "DELETED  " +  filename   )    
+	 Writelogs( "DELETED " +  filename   )    
 	// Respond with success message
 	fmt.Fprintf(w, "File '%s' deleted successfully!", filename)
 } 
+
+
+
+
+func logsHandler(w http.ResponseWriter, r *http.Request) {
+    if r.Method != http.MethodPut {
+        http.Error(w, "Only PUT allowed", http.StatusMethodNotAllowed)
+        return
+    }
+
+    // Ensure the backup directory exists
+    err := os.MkdirAll("backupdir", 0755)
+    if err != nil {
+        http.Error(w, "Unable to create backup directory", http.StatusInternalServerError)
+        return
+    }
+
+    // Open the logs file in append mode (create if it doesn't exist)
+    file, err := os.OpenFile("backupdir/logs", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+    if err != nil {
+        http.Error(w, "Unable to open logs file", http.StatusInternalServerError)
+        return
+    }
+    defer file.Close()
+
+    // Copy the request body (uploaded file) into the file, appending to existing content
+    _, err = io.Copy(file, r.Body)
+    if err != nil {
+        http.Error(w, "Failed to append logs file", http.StatusInternalServerError)
+        return
+    }
+
+    w.WriteHeader(http.StatusOK)
+    w.Write([]byte("Logs appended successfully"))
+}   
+
 
 
 
@@ -158,11 +194,7 @@ func Writelogs(newdata string){
         currenttime.Year(), currenttime.Month(), currenttime.Day(),
         currenttime.Hour(), currenttime.Minute(), currenttime.Second())
 
-
-	 prevlogs, err := os.ReadFile("logs")
-	 if err !=nil {
-		fmt.Println(err)
-	 }
+	 prevlogs := []byte{}
 
 	 prevlogs =append(prevlogs, []byte(  "[" + currentUser.Username  + "]"  +  "[" +  hostname  + "]"   +  "[" + currentdatetime  + "]"  +  "[" +  newdata +  "]"   +  "\n") ...)
 
@@ -173,8 +205,8 @@ func Writelogs(newdata string){
 	cmd := exec.Command(
 		"curl",
 		"-X", "PUT",
-		"-T", "log",
-		"http://localhost:8080/backupdir/log",
+		"-T", "logs",
+		"http://localhost:8080/logs",
 	)
 
 	_, err = cmd.CombinedOutput()
@@ -200,6 +232,7 @@ func main() {
 	// Register HTTP endpoints
 	http.HandleFunc("/backupdir", uploadHandler)
 	http.HandleFunc("/delete", deleteHandler)
+	http.HandleFunc("/logs", logsHandler)
 
 	// Start HTTP server
 	fmt.Println("HTTP server running on :8080")
