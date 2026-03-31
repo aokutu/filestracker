@@ -1,0 +1,19 @@
+INTRODUCTION 
+
+this  is  a programme   written  in  go   used to keep   track  of  changes in  files and   autobackup   whenever some changes  happen  in  a given   file  
+It  also  keeps  track  record  any changes   on files  logs   
+
+Have  two  files  
+ 1 server :  This   runs the server which   saves  the files  in  a centralised  place 
+ Folder : backupdir
+   
+ 2 client : This  is the file that will  run from  the  client   pc  and track  changes  and   send them  to  the  Centralised  server  
+ 3 other supportive files  are 
+    Folder :storage
+    serveraddress :  this will  have  the  url to the server   eg "http://192.168.89.243:8080/" (ENSURE  TO  PUT  UR SERVER URL )
+    file : logs 
+
+Run   the  Server  file  first     ie ./server 
+Run  the  Client  file  next   ie ./client 
+so  the  client   will run  from  client  pc  
+   
