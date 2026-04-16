@@ -1,4 +1,4 @@
-package main
+package modules
 
 import (
 	"bufio"
@@ -16,7 +16,7 @@ import (
 
 // ---------------------- HTTP HANDLERS ----------------------
 
-func uploadHandler(w http.ResponseWriter, r *http.Request) {
+func UploadHandler(w http.ResponseWriter, r *http.Request) {
 	// Parse the multipart form
 	err := r.ParseMultipartForm(10 << 20) // 10 MB limit
 	if err != nil {
@@ -61,7 +61,7 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 }
 
  
-func deleteHandler(w http.ResponseWriter, r *http.Request) {
+func DeleteHandler(w http.ResponseWriter, r *http.Request) {
 	// Ensure the method is DELETE
 	if r.Method != http.MethodDelete {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -98,7 +98,7 @@ func deleteHandler(w http.ResponseWriter, r *http.Request) {
 
 
 
-func logsHandler(w http.ResponseWriter, r *http.Request) {
+func LogsHandler(w http.ResponseWriter, r *http.Request) {
     if r.Method != http.MethodPut {
         http.Error(w, "Only PUT allowed", http.StatusMethodNotAllowed)
         return
@@ -135,7 +135,7 @@ func logsHandler(w http.ResponseWriter, r *http.Request) {
 
 // ---------------------- TCP HANDLER ----------------------
 
-func handleConnection(conn net.Conn) {
+func HandleConnection(conn net.Conn) {
 	defer conn.Close()
 
 	reader := bufio.NewReader(conn)
@@ -151,7 +151,7 @@ func handleConnection(conn net.Conn) {
 	}
 }
 
-func startTCPServer() {
+func StartTCPServer() {
 	listen, err := net.Listen("tcp", "localhost:3001")
 	if err != nil {
 		fmt.Println("TCP Listen error:", err)
@@ -166,7 +166,7 @@ func startTCPServer() {
 			continue
 		}
 		fmt.Println("Client connected:", conn.RemoteAddr())
-		go handleConnection(conn) // handle each client concurrently
+		go HandleConnection(conn) // handle each client concurrently
 	}
 }
 
@@ -224,20 +224,3 @@ func Writelogs(newdata string){
 
 
 
-
-func main() {
-	// Start TCP server in the background
-	go startTCPServer()
-
-	// Register HTTP endpoints
-	http.HandleFunc("/backupdir", uploadHandler)
-	http.HandleFunc("/delete", deleteHandler)
-	http.HandleFunc("/logs", logsHandler)
-
-	// Start HTTP server
-	fmt.Println("HTTP server running on :8080")
-	err := http.ListenAndServe(":8080", nil)
-	if err != nil {
-		fmt.Println("HTTP server error:", err)
-	}
-}
