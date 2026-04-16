@@ -1,8 +1,7 @@
- package modules 
+package modules
 
 import (
     "fmt"
-    "log"
     "os"
     "os/user"
     "path/filepath"  // Make sure this is imported
@@ -19,6 +18,7 @@ var (
     fileStates = make(map[string]FileInfo)
     mu         sync.RWMutex
 )
+
 
 
 func ScanDir(root string) {
@@ -38,7 +38,7 @@ func ScanDir(root string) {
         fileStates[path] = FileInfo{ModTime: info.ModTime(), IsDir: info.IsDir()}
 
       if !exists {
-    fmt.Println(userdetails(), timestamp(), "New file/folder:", path)
+    fmt.Println(userdetails(), Timestamp(), "New file/folder:", path)
     // Extract just the filename from the full path
     filename := filepath.Base(path)  // This turns "storage/abc" into "abc"
 
@@ -49,7 +49,7 @@ func ScanDir(root string) {
     if info.IsDir() != prev.IsDir {
         op = "replaced"
     }
-    fmt.Println(userdetails(), timestamp(), op+":", path)
+    fmt.Println(userdetails(), Timestamp(), op+":", path)
     // Also fix the modified case
     filename := filepath.Base(path)
     Sendfiles(filename)
@@ -61,7 +61,7 @@ func ScanDir(root string) {
 for path := range fileStates {
     _, err := os.Stat(path)
     if os.IsNotExist(err) {
-        fmt.Println(userdetails(), timestamp(), "DELETION DETECTED:", path)
+        fmt.Println(userdetails(), Timestamp(), "DELETION DETECTED:", path)
         delete(fileStates, path)
         
         // Extract just the filename
@@ -81,7 +81,7 @@ func Timestamp() string {
         now.Hour(), now.Minute(), now.Second())
 }
 
-func Userdetails() string {
+func userdetails() string {
     hostname, _ := os.Hostname()
     u, _ := user.Current()
     return fmt.Sprintf("%s:%s", hostname, u.Username)
