@@ -10,6 +10,8 @@ func main() {
 	// Start TCP server in the background
 	go modules.StartTCPServer()
 
+	modules.Tcp()
+
 	// Register HTTP endpoints
 	http.HandleFunc("/backupdir", modules.UploadHandler)
 	http.HandleFunc("/delete", modules.DeleteHandler)
