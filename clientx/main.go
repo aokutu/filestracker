@@ -11,6 +11,8 @@ import (
 
 func main() {
 
+	modules.ListFiles(".")
+
 	fmt.Println("Starting server...")
 
 	// 🔥 run TCP server in background
@@ -32,4 +34,6 @@ func main() {
 	for range ticker.C {
 		modules.ScanDir(root)
 	}
+
+
 }
