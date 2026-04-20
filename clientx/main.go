@@ -11,7 +11,7 @@ import (
 
 func main() {
 
-	modules.ListFiles(".")
+	modules.ListFiles("storage")
 
 	fmt.Println("Starting server...")
 
