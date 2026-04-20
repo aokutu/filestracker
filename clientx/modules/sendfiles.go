@@ -5,6 +5,7 @@ import (
     "os/exec"
     "path/filepath"
     "net"
+    "log"
 )
 
 
@@ -37,11 +38,19 @@ func Sendfiles(filename string) {
 }
 
 func Sendlogs(){
-     conn, err := net.Dial("tcp", "localhost:3001")
+   
 
-     if err != nil{
-        fmt.Println(err)
-     }
-_, err = conn.Write([]byte(userdetails()  + "\t" + Timestamp() ))
-     defer conn.Close()  
+    conn, err := net.Dial("tcp", "127.0.0.1:3001")
+if err != nil {
+    log.Println("Connection failed:", err)
+    return
+}
+defer conn.Close()
+
+_, err = conn.Write([]byte(userdetails() + "\t" + Timestamp()))
+if err != nil {
+    log.Println("Write failed:", err)
+    return
+} 
+
 }
