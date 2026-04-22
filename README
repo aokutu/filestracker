@@ -18,4 +18,6 @@ Run  the  Client  file  next   ie ./client
 so  the  client   will run  from  client  pc  
 
 Have added  file  backupserver.tar  that   is   an   image  of the  ./server file   that  can  be  run  as  an   image  (though not fine tuned)
+
+//still working  on  subdir 
    
