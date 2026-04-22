@@ -6,36 +6,51 @@ import (
     "path/filepath"
     "net"
     "log"
+    "os"
 )
 
 
 
-func Sendfiles(filename string) {
+
+// Sendfiles uploads file + creates necessary folders on destination
+func Sendfiles(relativePath string) {  // e.g. "A/B/C/photo.jpg"
     uploadURL := Getaddress()
-    
-    // DEBUG: Print the URL being used
+
+    fullPath := filepath.Join("storage", relativePath)
+
     fmt.Printf("DEBUG - Upload URL: %s\n", uploadURL)
-    
-    fullPath := filepath.Join("storage", filename)
-    fmt.Printf("DEBUG - Full file path: %s\n", fullPath)
-    
-    // Build the curl command as a string for debugging
-    cmdStr := fmt.Sprintf("curl -F file=@%s %s", fullPath, uploadURL)
-    fmt.Printf("DEBUG - Curl command: %s\n", cmdStr)
-    
-    cmd := exec.Command("curl", "-F", "file=@"+fullPath, uploadURL)
+    fmt.Printf("DEBUG - Relative path: %s\n", relativePath)
+    fmt.Printf("DEBUG - Full local path: %s\n", fullPath)
+
+    // Check if file exists
+    if _, err := os.Stat(fullPath); os.IsNotExist(err) {
+        fmt.Printf("ERROR: File not found: %s\n", fullPath)
+        return
+    }
+
+    // Use curl with two form fields:
+    // - filepath = folder structure + filename
+    // - file     = actual file content
+    cmd := exec.Command("curl",
+        "-F", "filepath="+relativePath,           // Tell server the desired path
+        "-F", "file=@"+fullPath,                  // The file itself
+        uploadURL,
+    )
+
+    fmt.Printf("DEBUG - Curl command: curl -F filepath=%s -F file=@%s %s\n", relativePath, fullPath, uploadURL)
+
     output, err := cmd.CombinedOutput()
-    
-    fmt.Printf("DEBUG - Curl output: %s\n", string(output))
-    
+    fmt.Printf("DEBUG - Curl output:\n%s\n", string(output))
+
     if err != nil {
-        fmt.Printf("Error uploading %s: %v\n", filename, err)
+        fmt.Printf("Error uploading %s: %v\n", relativePath, err)
     } else {
-        fmt.Printf("Successfully uploaded %s\n", filename)
+        fmt.Printf("✅ Successfully uploaded %s (with folder structure)\n", relativePath)
     }
 
     Sendlogs()
 }
+
 
 func Sendlogs(){
    
