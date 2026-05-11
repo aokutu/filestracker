@@ -5,39 +5,37 @@ import (
 	"net/url"
 	"os/exec"
 	"path/filepath"
+	"strings" // add this
 )
 
 func DeleteFile(path string) {
-	// Normalize slashes and remove "./" prefix
+	// Normalize path
 	relPath := filepath.ToSlash(path)
-	if len(relPath) > 0 && relPath[:2] == "./" {
-		relPath = relPath[2:]
-	}
+	relPath = strings.TrimPrefix(relPath, "./")
 
-	// URL-encode to handle spaces/special charactersls
+	// Strip the storage/ prefix that the server doesn't know about
+	relPath = strings.TrimPrefix(relPath, "storage/")
 
-	encodedPath := url.QueryEscape(relPath)
+	// Build server URL
+	baseURL := "http://localhost:8080/delete"
 
-	serverurl :=Getaddress() + "?file="
+	// Add query parameter safely
+	q := url.Values{}
+	q.Set("file", relPath)
+	finalURL := baseURL + "?" + q.Encode()
 
-	// Build curl DELETE command
-	// cmd := exec.Command("curl", "-X", "DELETE", serverurl+encodedPath)
+	fmt.Println("Deleting via:", finalURL)
 
-	cmd := exec.Command(
-		"curl",                // executable
-		"-X",                  // first argument
-		"DELETE",              // second argument
-		serverurl+encodedPath, // third argument (full URL)
-	)
-
-	fmt.Println("File :", encodedPath)
-	cmd = exec.Command("curl", "-X", "DELETE", "http://localhost:8080/delete?file="+encodedPath)
+	// Run curl command
+	cmd := exec.Command("curl", "-X", "DELETE", "-s", "-w", "\nHTTP_CODE:%{http_code}", finalURL)
 
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		fmt.Printf("Failed to delete %s: %v\n", path, err)
 		fmt.Printf("Curl output: %s\n", string(output))
-	} else {
-		fmt.Printf("Successfully deleted %s from backupdir\n", path)
+		return
 	}
+
+	fmt.Printf("Successfully deleted %s from backupdir\n", path)
+	fmt.Printf("Response: %s\n", string(output))
 }
