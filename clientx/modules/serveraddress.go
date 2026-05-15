@@ -5,7 +5,7 @@ import "strings"
 import "fmt"
 
 
-func Getaddress() string {
+func Getaddress(IpAddress string) string {
     serverbyte, err := os.ReadFile("serveraddress")
     if err != nil {
         fmt.Println("Error reading serveraddress file, using default")

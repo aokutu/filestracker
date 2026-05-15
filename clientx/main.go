@@ -7,9 +7,15 @@ import (
 	_"net"
 	"os"
 	"time"
+	"bufio"
 )
 
 func main() {
+
+	fmt.Print("ENTER  SERVER IP ADDRESS :\t ")
+	Reader := bufio.NewReader(os.Stdin)
+	IpAddress,_ := Reader.ReadString('\n')
+	fmt.Print(IpAddress)
 
 	modules.ListFiles("storage")
 
