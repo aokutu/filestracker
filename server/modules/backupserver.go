@@ -19,11 +19,11 @@ import (
 
 func UploadHandler(w http.ResponseWriter, r *http.Request) {
     // Parse multipart form with max memory
-    err := r.ParseMultipartForm(32 << 20) // 32MB max
-    if err != nil {
+   // 32MB max
+  /*  if err != nil {
         http.Error(w, "cannot parse form: "+err.Error(), 400)
         return
-    }
+    } */
 
     // Get filepath FIRST (before extracting file)
     filePath := r.FormValue("filepath")
@@ -76,6 +76,7 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
     fmt.Printf("DEBUG: wrote %d bytes to %s\n", written, dstPath)
 
     fmt.Fprintf(w, "uploaded: %s (%d bytes)\n", filePath, written)
+	Writelogs("UPDATED " + filePath)
 }
 
 func DeleteHandler(w http.ResponseWriter, r *http.Request) {
@@ -162,7 +163,6 @@ func HandleConnection(conn net.Conn) {
 }
 
 // ---------------------- MAIN ----------------------
-
 func Writelogs(newdata string) {
 	currentUser, err := user.Current()
 	if err != nil {
@@ -170,7 +170,6 @@ func Writelogs(newdata string) {
 		return
 	}
 
-	// Get computer/hostname
 	hostname, err := os.Hostname()
 	if err != nil {
 		fmt.Println("Error getting hostname:", err)
@@ -182,21 +181,31 @@ func Writelogs(newdata string) {
 		currenttime.Year(), currenttime.Month(), currenttime.Day(),
 		currenttime.Hour(), currenttime.Minute(), currenttime.Second())
 
-	prevlogs := []byte{}
+	logEntry := "[" + currentUser.Username + "][" + hostname + "][" + currentdatetime + "][" + newdata + "]\n"
 
-	prevlogs = append(prevlogs, []byte("["+currentUser.Username+"]"+"["+hostname+"]"+"["+currentdatetime+"]"+"["+newdata+"]"+"\n")...)
+	// ✅ OPEN FILE IN APPEND MODE (creates if doesn't exist)
+	///Desktop/filestracker/server/backupdir$
+	file, err := os.OpenFile("logs", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	if err != nil {
+		fmt.Println("Error opening log file:", err)
+		return
+	}
+	defer file.Close()
 
-	os.WriteFile("logs", prevlogs, 0644)
+	// ✅ WRITE TO FILE (appends, doesn't overwrite)
+	_, err = file.WriteString(logEntry)
+	if err != nil {
+		fmt.Println("Error writing to log file:", err)
+		return
+	}
 
-	cmd := exec.Command(
-		"curl",
-		"-X", "PUT",
-		"-T", "logs",
-		"http://localhost:8080/logs",
-	)
+	// Also print to terminal
+	fmt.Print(logEntry)
 
+	// Upload via curl...
+	cmd := exec.Command("curl", "-X", "PUT", "-T", "logs", "http://localhost:8080/logs")
 	_, err = cmd.CombinedOutput()
 	if err != nil {
-		fmt.Println("Error:", err)
+		fmt.Println("Error uploading:", err)
 	}
 }
