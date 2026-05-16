@@ -5,18 +5,11 @@ It  also  keeps  track  record  any changes   on files  logs
 Can  handle  Create/Update/Delete  files  in   subfolder   
 
 Have  two  files  
- 1 server :  This   runs the server which   saves  the files  in  a centralised  place 
- Folder : backupdir
-   
- 2 client : This  is the file that will  run from  the  client   pc  and track  changes  and   send them  to  the  Centralised  server  
- 3 other supportive files  are 
-    Folder :storage
-    serveraddress :  this will  have  the  url to the server   eg "http://192.168.89.243:8080/" (ENSURE  TO  PUT  UR SERVER URL )
-    file : logs 
-
-Run   the  Server  file  first     ie ./server 
-Run  the  Client  file  next   ie ./client 
-so  the  client   will run  from  client  pc  
-
-Have added  file  backupserver.tar  that   is   an   image  of the  ./server file   that  can  be  run  as  an   image  (though not fine tuned) 
+ 1 Ensure Go interpreter  is installed 
+ 2 We  heve  two  folders 1  Server (runs the server   for the  files storage) and Clientx  (where  the files will be  monitored in the client  Pc )
+ 3 Run   server/go run . (In  the  server end) 
+ 4 Take the Clientx  folder and copy  it to the  client(s) who  need their  files  tracked  then  go to Clientx  folder and run (go run .)
+ 5 Enter  the  IPADDRESS:P0RT NUMBER port number  is 8080 
+ 6 so  the Root folder where the  files need to be tracked is called storage inside the Clientx  This is  where all the files   that need be tracked 
+ 
    
