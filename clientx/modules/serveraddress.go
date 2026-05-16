@@ -5,14 +5,13 @@ import "strings"
 import "fmt"
 
 
-func Getaddress(IpAddress string) string {
+func Getaddress() string {
     serverbyte, err := os.ReadFile("serveraddress")
     if err != nil {
         fmt.Println("Error reading serveraddress file, using default")
         return "http://127.0.0.1:8080/backupdir"  // Make sure it has the full path
     }
     address := strings.TrimSpace(string(serverbyte))
-    
     // Make sure it has http:// prefix
     if !strings.HasPrefix(address, "http://") && !strings.HasPrefix(address, "https://") {
         address = "http://" + address

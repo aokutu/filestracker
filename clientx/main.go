@@ -12,11 +12,15 @@ import (
 
 func main() {
 
-	fmt.Print("ENTER  SERVER IP ADDRESS :\t ")
+	fmt.Print("ENTER  SERVER IP ADDRESS :")
 	Reader := bufio.NewReader(os.Stdin)
 	IpAddress,_ := Reader.ReadString('\n')
-	fmt.Print(IpAddress)
-
+	
+ err := os.WriteFile("serveraddress",  []byte(IpAddress), 0644)
+    if err != nil {
+        fmt.Println("Error:", err)
+        return
+    }
 	modules.ListFiles("storage")
 
 	fmt.Println("Starting server...")
