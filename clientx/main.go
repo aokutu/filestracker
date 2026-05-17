@@ -12,7 +12,7 @@ import (
 
 func main() {
 
-	fmt.Print("ENTER  SERVER IP ADDRESS :")
+	fmt.Print("ENTER  SERVER IP ADDRESS:PORTNUMBER :")
 	Reader := bufio.NewReader(os.Stdin)
 	IpAddress,_ := Reader.ReadString('\n')
 	
