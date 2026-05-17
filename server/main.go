@@ -14,7 +14,7 @@ func main() {
 	http.HandleFunc("/backupdir", modules.UploadHandler)
 	http.HandleFunc("/delete", modules.DeleteHandler)
 	http.HandleFunc("/logs", modules.LogsHandler)
-
+	http.HandleFunc("/readlogs", modules.Readlogs)
 	// Start HTTP server
 	fmt.Println("HTTP server runninig on :8080")
 	err := http.ListenAndServe(":8080", nil)
