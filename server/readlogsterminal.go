@@ -33,34 +33,8 @@ func main() {
 	}
 
 	fmt.Print(string(body),"\n")
-	Filestring()
 	
 }
 
 
 
-
-func Filestring() {
-	file, err := os.Open("logs")
-	if err != nil {
-		fmt.Println("Error:", err)
-		return
-	}
-	defer file.Close()
-
-	var lines []string
-	scanner := bufio.NewScanner(file)
-	
-	for scanner.Scan() {
-		lines = append(lines, scanner.Text())
-	}
-
-	if err := scanner.Err(); err != nil {
-		fmt.Println("Scan error:", err)
-	}
-
-	// Print all lines
-	for i, line := range lines {
-		fmt.Println(i ,"\t", line)
-	}
-}
