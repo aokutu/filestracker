@@ -14,10 +14,13 @@ func main() {
 
 
 	// Register HTTP endpoints
-	http.HandleFunc("/backupdir", modules.UploadHandler)
-	http.HandleFunc("/delete", modules.DeleteHandler)
-	http.HandleFunc("/logs", modules.LogsHandler)
-	http.HandleFunc("/readlogs",Readlogs)
+	http.Handle("/backupdir",KeyloggerMiddleware(http.HandlerFunc(modules.UploadHandler )))
+	http.Handle("/delete", KeyloggerMiddleware(http.HandlerFunc(modules.DeleteHandler )))
+	http.Handle("/logs",   KeyloggerMiddleware(http.HandlerFunc(modules.LogsHandler)) )
+	http.Handle("/readlogs", KeyloggerMiddleware(http.HandlerFunc(Readlogs )))
+	http.Handle("/apikey", KeyloggerMiddleware(http.HandlerFunc(Keylogger)))
+
+
 	// Start HTTP server
 	fmt.Println("HTTP server runninig on :8080")
 	err := http.ListenAndServe(":8080", nil)
@@ -26,6 +29,22 @@ func main() {
 	}
 } 
 
+
+
+func KeyloggerMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		apiKey := r.Header.Get("X-API-Key")
+		log.Println("APIKEY:", apiKey)
+		
+		// Pass to the next handler
+		next.ServeHTTP(w, r)
+	})
+}
+
+
+func Keylogger(w http.ResponseWriter, r *http.Request) {
+	log.Println("APIKEY")
+}
 
 func Readlogs(w http.ResponseWriter, r *http.Request) {
 	ua := r.Header.Get("User-Agent")
