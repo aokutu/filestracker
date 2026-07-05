@@ -30,20 +30,26 @@ func main() {
 } 
 
 
-
+//curl -H "X-API-Key: 4664" http://localhost:8080/apikey
 func KeyloggerMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		apiKey := r.Header.Get("X-API-Key")
-		log.Println("APIKEY:", apiKey)
+		if apiKey != "4664" {
+			log.Println("INVALID KEY ")
+			return 
+		} else {
+			log.Println("ACCESS  PERMITED")
+			// Pass to the next handler
+			next.ServeHTTP(w, r)
+		}
 		
-		// Pass to the next handler
-		next.ServeHTTP(w, r)
+		
+		
 	})
 }
 
 
 func Keylogger(w http.ResponseWriter, r *http.Request) {
-	log.Println("APIKEY")
 }
 
 func Readlogs(w http.ResponseWriter, r *http.Request) {
