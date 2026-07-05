@@ -80,7 +80,8 @@ func uploadSingleFile(relativePath string) {
 	}
 
 	cmd := exec.Command("curl",
-		"-s",                               // silent mode (less noise)
+		"-s", 
+		"-H", "X-API-Key: 4664" ,                              // silent mode (less noise)
 		"-w", "\nHTTP_CODE:%{http_code}\n", // get HTTP status
 		"-F", "filepath="+relativePath, // A/B/filename — server creates backupdir/A/B/filename
 		"-F", "file=@"+fullPath,

@@ -203,7 +203,7 @@ func Writelogs(newdata string) {
 	fmt.Print(logEntry)
 
 	// Upload via curl...
-	cmd := exec.Command("curl", "-X", "PUT", "-T", "logs", "http://localhost:8080/logs")
+	cmd := exec.Command("curl","-H", "X-API-Key: 4664" , "-X", "PUT", "-T", "logs", "http://localhost:8080/logs")
 	_, err = cmd.CombinedOutput()
 	if err != nil {
 		fmt.Println("Error uploading:", err)

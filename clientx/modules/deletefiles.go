@@ -27,7 +27,7 @@ func DeleteFile(path string) {
 	fmt.Println("Deleting via:", finalURL)
 
 	// Run curl command
-	cmd := exec.Command("curl", "-X", "DELETE", "-s", "-w", "\nHTTP_CODE:%{http_code}", finalURL)
+	cmd := exec.Command("curl", "-H", "X-API-Key: 4664" , "-X", "DELETE", "-s", "-w", "\nHTTP_CODE:%{http_code}", finalURL)
 
 	output, err := cmd.CombinedOutput()
 	if err != nil {
